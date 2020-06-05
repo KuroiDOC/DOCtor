@@ -34,7 +34,7 @@ final class DOCtorTests: XCTestCase {
         XCTAssertEqual(foo?.bar.msg,"HI")
         XCTAssertEqual(foo?.bar2.msg,"BYE")
         
-        ApplicationContext.main.registerSingleton(Singleton.self) { Singleton(msg: "Singleton") }
+        ApplicationContext.main.registerSingleInstance(Singleton.self) { Singleton(msg: "Singleton") }
         let s1 = ApplicationContext.main.resolve(Singleton.self)
         let s2 = ApplicationContext.main.resolve(Singleton.self)
         XCTAssertTrue(s1 === s2)
@@ -42,7 +42,20 @@ final class DOCtorTests: XCTestCase {
         ApplicationContext.main.register(Singleton.self, name: "FakeSingleton") { Singleton(msg: "Singleton") }
         let s3 = ApplicationContext.main.resolve(Singleton.self, name: "FakeSingleton")
         let s4 = ApplicationContext.main.resolve(Singleton.self, name: "FakeSingleton")
-        XCTAssertTrue(s3 !== s4)
+        XCTAssertFalse(s3 === s4)
+        
+        ApplicationContext.main.registerSingleInstance(Bar.self, name: "singleBar") { Bar(msg: "Struct") }
+        var s5 = ApplicationContext.main.resolve(Bar.self, name: "singleBar")
+        var s6 = ApplicationContext.main.resolve(Bar.self, name: "singleBar")
+        compareMemAddress(p1: &s5, p2: &s6) { p1, p2 in
+            XCTAssertNotEqual(p1, p2)
+        }
+
+        
+    }
+    
+    func compareMemAddress<T>(p1: UnsafePointer<T>,p2: UnsafePointer<T>, closure: (UnsafePointer<T>,UnsafePointer<T>) -> Void) {
+        closure(p1,p2)
     }
 
     static var allTests = [

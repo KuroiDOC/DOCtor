@@ -7,8 +7,8 @@ public class ApplicationContext {
     private var singletlonsRegistry: [AnyHashable: Any] = [:]
     
     public func register<Service>(_ service: Service.Type,
-                                  factory: @escaping () -> Service,
-                                  name: String? = nil) {
+                                  name: String? = nil,
+                                  factory: @escaping () -> Service) {
         let key = ApplicationContext.key(service, name: name)
         registry[key] = factory
     }
@@ -18,12 +18,12 @@ public class ApplicationContext {
         return registry[key]?() as? Service
     }
     
-    // Creates closure to resolve dependency as a singleton
-    public func registerSingleton<Service:AnyObject>(_ service: Service.Type,
-                                           factory: @escaping () -> Service,
-                                           name: String? = nil) {
+    // Whenever possible, creates closure to resolve dependency as a singleton.
+    public func registerSingleInstance<Service>(_ service: Service.Type,
+                                                name: String? = nil,
+                                                factory: @escaping () -> Service) {
         let key = ApplicationContext.key(service, name: name)
-        register(service, factory: { [weak self] () -> Service in
+        register(service, name: name, factory: { [weak self] () -> Service in
             if let instance = self?.singletlonsRegistry[key] as? Service {
                 return instance
             } else {
@@ -31,7 +31,7 @@ public class ApplicationContext {
                 self?.singletlonsRegistry[key] = instance
                 return instance
             }
-        }, name: name)
+        })
     }
     
     private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
