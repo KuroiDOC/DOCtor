@@ -25,33 +25,31 @@ final class DOCtorTests: XCTestCase {
             }
         }
         
-        ApplicationContext.main.register(Foo.self) { Foo() }
-        ApplicationContext.main.register(Bar.self) { Bar(msg: "HI") }
-        ApplicationContext.main.register(Bar.self, name: "Bar2") { Bar(msg: "BYE") }
+        Container.main.register(Factory { Foo() })
+        Container.main.register(Factory { Bar(msg: "HI") })
+        Container.main.register(Factory { Bar(msg: "BYE") }, name: "Bar2")
 
-        let foo = ApplicationContext.main.resolve(Foo.self)
+        let foo = Container.main.resolve(Foo.self)
         XCTAssertNotNil(foo)
         XCTAssertEqual(foo?.bar.msg,"HI")
         XCTAssertEqual(foo?.bar2.msg,"BYE")
         
-        ApplicationContext.main.registerSingleInstance(Singleton.self) { Singleton(msg: "Singleton") }
-        let s1 = ApplicationContext.main.resolve(Singleton.self)
-        let s2 = ApplicationContext.main.resolve(Singleton.self)
+        Container.main.register(Single { Singleton(msg: "Singleton") })
+        let s1 = Container.main.resolve(Singleton.self)
+        let s2 = Container.main.resolve(Singleton.self)
         XCTAssertTrue(s1 === s2)
         
-        ApplicationContext.main.register(Singleton.self, name: "FakeSingleton") { Singleton(msg: "Singleton") }
-        let s3 = ApplicationContext.main.resolve(Singleton.self, name: "FakeSingleton")
-        let s4 = ApplicationContext.main.resolve(Singleton.self, name: "FakeSingleton")
+        Container.main.register(Factory { Singleton(msg: "Singleton") }, name: "FakeSingleton")
+        let s3 = Container.main.resolve(Singleton.self, name: "FakeSingleton")
+        let s4 = Container.main.resolve(Singleton.self, name: "FakeSingleton")
         XCTAssertFalse(s3 === s4)
         
-        ApplicationContext.main.registerSingleInstance(Bar.self, name: "singleBar") { Bar(msg: "Struct") }
-        var s5 = ApplicationContext.main.resolve(Bar.self, name: "singleBar")
-        var s6 = ApplicationContext.main.resolve(Bar.self, name: "singleBar")
+        Container.main.register(Single { Bar(msg: "Struct") }, name: "singleBar")
+        var s5 = Container.main.resolve(Bar.self, name: "singleBar")
+        var s6 = Container.main.resolve(Bar.self, name: "singleBar")
         compareMemAddress(p1: &s5, p2: &s6) { p1, p2 in
             XCTAssertNotEqual(p1, p2)
         }
-
-        
     }
     
     func compareMemAddress<T>(p1: UnsafePointer<T>,p2: UnsafePointer<T>, closure: (UnsafePointer<T>,UnsafePointer<T>) -> Void) {

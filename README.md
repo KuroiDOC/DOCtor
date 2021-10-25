@@ -21,16 +21,16 @@ class Singleton {
     }
 }
 
-ApplicationContext.main.register(Foo.self) { Foo() }
-ApplicationContext.main.register(Bar.self) { Bar(msg: "HI") }
-ApplicationContext.main.register(Bar.self, name: "Bar2") { Bar(msg: "BYE") }
+Container.main.register(Factory { Foo() })
+Container.main.register(Factory { Bar(msg: "HI") })
+Container.main.register(Factory { Bar(msg: "BYE") }, name: "Bar2")
 
-let foo = ApplicationContext.main.resolve(Foo.self)
+let foo = Container.main.resolve(Foo.self)
 
-ApplicationContext.main.registerSingleton(Singleton.self) { Singleton(msg: "Singleton") }
-ApplicationContext.main.register(Singleton.self, name: "FakeSingleton") { Singleton(msg: "Singleton") }
+Container.main.register(Single { Singleton(msg: "Singleton") })
+Container.main.register(Factory { Singleton(msg: "NotASingleton") }, name: "FakeSingleton")
 
-let singleton = ApplicationContext.main.resolve(Singleton.self)
+let singleton = Container.main.resolve(Singleton.self)
 
 ```
 
