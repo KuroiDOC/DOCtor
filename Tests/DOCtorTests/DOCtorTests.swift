@@ -56,6 +56,9 @@ final class DOCtorTests: XCTestCase {
         XCTAssertNotNil(s7)
         XCTAssertEqual(s7?.msg, "Clash")
         XCTAssertNotNil(s8)
+        
+        Container.main.reset()
+        XCTAssertNil(Container.main.resolve(Foo.self))
     }
     
     func compareMemAddress<T>(p1: UnsafePointer<T>,p2: UnsafePointer<T>, closure: (UnsafePointer<T>,UnsafePointer<T>) -> Void) {

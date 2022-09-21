@@ -25,6 +25,11 @@ public class Container {
     private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
         Key(name: name, identifier: ObjectIdentifier(service))
     }
+    
+    /// Clear DI graph
+    public func reset() {
+        registry = [:]
+    }
 }
 
 private struct Key: Hashable {
