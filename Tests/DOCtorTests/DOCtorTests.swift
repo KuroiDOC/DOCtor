@@ -61,6 +61,26 @@ final class DOCtorTests: XCTestCase {
         XCTAssertNil(Container.main.resolve(Foo.self))
     }
     
+    func testResultBuilder() {
+        Container.main.register {
+            Factory { Foo() }
+            Factory { Bar(msg: "HI") }
+            Factory(name: "Bar2") { Bar(msg: "BYE") }
+            Single(name: "singleBar") { Bar(msg: "Struct") }
+        }
+        
+        let foo = Container.main.resolve(Foo.self)
+        XCTAssertNotNil(foo)
+        XCTAssertEqual(foo?.bar.msg,"HI")
+        XCTAssertEqual(foo?.bar2.msg,"BYE")
+        
+        var s1 = Container.main.resolve(name: "singleBar", Bar.self)
+        var s2 = Container.main.resolve(name: "singleBar", Bar.self)
+        compareMemAddress(p1: &s1, p2: &s2) { p1, p2 in
+            XCTAssertNotEqual(p1, p2)
+        }
+    }
+    
     func compareMemAddress<T>(p1: UnsafePointer<T>,p2: UnsafePointer<T>, closure: (UnsafePointer<T>,UnsafePointer<T>) -> Void) {
         closure(p1,p2)
     }
