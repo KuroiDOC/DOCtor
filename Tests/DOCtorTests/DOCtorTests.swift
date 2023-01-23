@@ -2,6 +2,10 @@ import XCTest
 @testable import DOCtor
 
 final class DOCtorTests: XCTestCase {
+
+    override class func tearDown() {
+        Container.main.reset()
+    }
     
     struct Foo {
         @Injectable var bar: Bar
