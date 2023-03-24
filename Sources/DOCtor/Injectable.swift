@@ -10,8 +10,7 @@ public struct Injectable<T> {
             if let value = store.value {
                 return value
             }
-            store.value = container.resolve(name: name, T.self)
-            precondition(store.value != nil, "Failed to inject dependency: \(String(describing: T.self)), name: \(name ?? "nil")")
+            store.value = container.strictResolve(name: name, T.self)
             return store.value!
         }
     }

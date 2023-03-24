@@ -21,6 +21,13 @@ public class Container {
             return nil
         }
     }
+
+    public func strictResolve<Service>(name: String? = nil, _ service: Service.Type) -> Service {
+        guard let obj = self.resolve(name: name, service) else {
+            preconditionFailure("Failed to resolve dependency: \(String(describing: Service.self)), name: \(name ?? "nil")")
+        }
+        return obj
+    }
     
     private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
         Key(name: name, identifier: ObjectIdentifier(service))
