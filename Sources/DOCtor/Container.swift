@@ -28,7 +28,11 @@ public class Container {
         }
         return obj
     }
-    
+
+    public func strictResolve<Service>(name: String? = nil) -> Service {
+        strictResolve(name: name, Service.self)
+    }
+
     private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
         Key(name: name, identifier: ObjectIdentifier(service))
     }

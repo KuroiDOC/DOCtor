@@ -31,10 +31,9 @@ final class DOCtorTests: XCTestCase {
         Container.main.register(Factory { Bar(msg: "HI") })
         Container.main.register(Factory(name: "Bar2") { Bar(msg: "BYE") })
 
-        let foo = Container.main.resolve(Foo.self)
-        XCTAssertNotNil(foo)
-        XCTAssertEqual(foo?.bar.msg,"HI")
-        XCTAssertEqual(foo?.bar2.msg,"BYE")
+        let foo: Foo = Container.main.strictResolve()
+        XCTAssertEqual(foo.bar.msg,"HI")
+        XCTAssertEqual(foo.bar2.msg,"BYE")
         
         Container.main.register(Single { Singleton(msg: "Singleton") })
         let s1 = Container.main.resolve(Singleton.self)
@@ -55,10 +54,9 @@ final class DOCtorTests: XCTestCase {
         
         Container.main.register(Factory(name: "Clash") { Bar(msg: "Clash") })
         Container.main.register(Factory(name: "Clash") { Baz() })
-        let s7 = Container.main.resolve(name: "Clash", Bar.self)
+        let s7 = Container.main.strictResolve(name: "Clash", Bar.self)
         let s8 = Container.main.resolve(name: "Clash", Baz.self)
-        XCTAssertNotNil(s7)
-        XCTAssertEqual(s7?.msg, "Clash")
+        XCTAssertEqual(s7.msg, "Clash")
         XCTAssertNotNil(s8)
         
         Container.main.reset()
