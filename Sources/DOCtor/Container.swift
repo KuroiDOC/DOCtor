@@ -1,16 +1,23 @@
 import Foundation
 
-public class Container {
+final public class Container: @unchecked Sendable {
     public static let main = Container()
     
-    private var registry: [AnyHashable: Any] = [:]
-    
+    private var registry: [Key: any Registrable] = [:]
+    private var lock: NSLock = .init()
+
     public func register<T: Registrable>(_ registrable: T) {
+        lock.lock()
+        defer { lock.unlock() }
+
         let key = Container.key(T.Service.self, name: registrable.name)
         registry[key] = registrable
     }
     
     public func resolve<Service>(name: String? = nil, _ service: Service.Type) -> Service? {
+        lock.lock()
+        defer { lock.unlock() }
+
         let key = Container.key(service, name: name)
         switch registry[key] {
         case let obj as Single<Service>:
@@ -33,7 +40,7 @@ public class Container {
         strictResolve(name: name, Service.self)
     }
 
-    private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
+    private static func key<Service>(_ service: Service.Type, name: String?) -> Key {
         Key(name: name, identifier: ObjectIdentifier(service))
     }
     
@@ -43,7 +50,7 @@ public class Container {
     }
 }
 
-private struct Key: Hashable {
+private struct Key: Hashable, Sendable {
     var name: String?
     var identifier: ObjectIdentifier
 }
