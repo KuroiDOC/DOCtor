@@ -1,15 +1,18 @@
 import Foundation
 
-public class Container {
-    public static let main = Container()
-    
+@MainActor
+public final class Container: Sendable {
+    nonisolated public static let main = Container()
+
     private var registry: [AnyHashable: Any] = [:]
-    
+
+    nonisolated init() {}
+
     public func register<T: Registrable>(_ registrable: T) {
         let key = Container.key(T.Service.self, name: registrable.name)
         registry[key] = registrable
     }
-    
+
     public func resolve<Service>(name: String? = nil, _ service: Service.Type) -> Service? {
         let key = Container.key(service, name: name)
         switch registry[key] {
@@ -36,7 +39,7 @@ public class Container {
     private static func key<Service>(_ service: Service.Type, name: String?) -> AnyHashable {
         Key(name: name, identifier: ObjectIdentifier(service))
     }
-    
+
     /// Clear DI graph
     public func reset() {
         registry = [:]
@@ -58,12 +61,12 @@ public struct Factory<Service>: Registrable {
     public typealias Builder = () -> Service
     var builder: Builder
     public var name: String?
-    
+
     public init(name: String? = nil, _ builder: @escaping Builder) {
         self.name = name
         self.builder = builder
     }
-    
+
     public var service: Service {
         builder()
     }
@@ -74,12 +77,12 @@ public class Single<Service>: Registrable {
     private let builder: Builder
     private var instance: Service?
     public var name: String?
-    
+
     public init(name: String? = nil, _ builder: @escaping Builder) {
         self.name = name
         self.builder = builder
     }
-    
+
     public var service: Service {
         if let instance = instance { return instance }
         let newInstance = builder()
