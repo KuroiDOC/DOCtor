@@ -1,7 +1,7 @@
 import Foundation
 
 @propertyWrapper
-public struct Injectable<T> {
+public struct Injectable<T>: @unchecked Sendable {
     private var name: String?
     private var container: Container
     private var store = InjectableStore<T>()
@@ -10,8 +10,9 @@ public struct Injectable<T> {
             if let value = store.value {
                 return value
             }
-            store.value = container.strictResolve(name: name, T.self)
-            return store.value!
+            let value = container.strictResolve(name: name, T.self)
+            store.value = value
+            return value
         }
     }
 
@@ -21,6 +22,6 @@ public struct Injectable<T> {
     }
 }
 
-private class InjectableStore<T> {
+private final class InjectableStore<T> {
     var value: T?
 }
